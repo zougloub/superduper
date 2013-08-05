@@ -103,7 +103,7 @@ class Files(object):
 		else :
 			f.pos = pos
 			f.file = None
-	
+
 	def close_a_file(self):
 		for k,v in self._files.items():
 			if v.file is not None:
@@ -111,7 +111,7 @@ class Files(object):
 				return
 
 class DupFinder(object):
-	
+
 	def __init__(self,dirs=None):
 		self._files = {} # files, by size
 		self._inodes = set()
@@ -207,7 +207,7 @@ class DupFinder(object):
 					eof = True
 
 			groups = n_groups
-	
+
 		for g in groups:
 			for f in g:
 				self._file_handles.close(f, remove=True)
@@ -248,33 +248,33 @@ def main():
 
 	parser.add_option(
 	 "-q", "--quiet",
-     action="store_false",
+	 action="store_false",
 	 dest="verbose",
 	 default=True,
-     help="don't print status messages to stdout"
+	 help="don't print status messages to stdout"
 	)
-		
+
 	parser.add_option(
 	 "", "--hardlink",
 	 action="store_true",
 	 dest="hardlink",
-     help="hard-link identical files",
+	 help="hard-link identical files",
 	)
 
 	parser.add_option(
 	 "", "--dump",
 	 dest="dump",
-     help="dump list of dupes to file",
+	 help="dump list of dupes to file",
 	)
-	
+
 	parser.add_option(
 	 "", "--load",
 	 dest="load",
-     help="load list of dupes from file",
+	 help="load list of dupes from file",
 	)
 
 	options, args = parser.parse_args()
-	
+
 	if args == []:
 		parser.print_version()
 		parser.print_usage()
@@ -289,30 +289,30 @@ def main():
 		printf("OK\n")
 	else:
 		d = DupFinder()
-	
+
 		printf("Looking for duplicates in %s\n" % args)
-	
+
 		d.add_dirs(args)
 		alldupes = d.find_dups()
 
 		if options.verbose:
 			printf("Total files: %d\n" % d._num_files)
 			printf("Bytes read: %d\n" % d._bytes_read)
-	
+
 	if options.dump:
 		with open(options.dump, "wb") as f:
 			pickle.dump(alldupes, f)
 
 	#print("Alldupes=%s" % pprint.pformat(alldupes, depth=150, width=10000))
 	#return
-	
+
 	if options.verbose:
 		print("Report:")
 
 	for size, dupes in sorted(alldupes):
 		if options.verbose:
 			sys.stdout.write("- size %s\n" % size)
-		
+
 		for files in dupes:
 			if options.hardlink:
 				orig = files[0]
