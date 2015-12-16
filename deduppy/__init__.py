@@ -12,15 +12,17 @@ verbose = 0
 
 
 class File(object):
-	""" Simple file descriptor wrapper """
+	"""
+	Simple file descriptor wrapper
+	"""
 	def __init__(self, _file=None, _pos=None):
 		self.file = _file
 		self.pos = _pos
 
 class Files(object):
 	"""
-		File cache, which can hold a certain amount
-		of open file descriptors
+	File cache, which can hold a certain amount
+	of open file descriptors
 	"""
 	def __init__(self, max_files=None):
 		self._files = {} # name -> handle dictionary
