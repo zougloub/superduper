@@ -4,16 +4,12 @@
 
 __author__ = 'Jérôme Carretero <cJ-deduppy@zougloub.eu>'
 
-import sys, os, optparse, pickle, pprint
+import sys, os
 
 BLOCKSIZE = 1024 * 8
 
 verbose = 0
 
-def printf(x):
-	if verbose > 0:
-		sys.stdout.write(x)
-		sys.stdout.flush()
 
 class File(object):
 	""" Simple file descriptor wrapper """
@@ -116,31 +112,31 @@ class DupFinder(object):
 				self._num_files += 1
 
 	def _build_flist(self):
-		printf("Building file list...")
+		self.printf("Building file list...")
 		for d in self._dirs:
-			printf("(%s)..." % d)
+			self.printf("(%s)..." % d)
 			self._walk_dir(d)
-		printf("OK\n")
+		self.printf("OK\n")
 
 	def _clear_singles(self):
 		"""
 			remove self._files entries which have only one file
 		"""
-		printf("Clearing singles...")
+		self.printf("Clearing singles...")
 		singles = [size for size, files in self._files.items() if len(files) == 1]
 		for size in singles:
 			self._files.pop(size)
-		printf("OK\n")
+		self.printf("OK\n")
 
 	def _clear_small(self):
 		"""
 			remove self._files entries which have too small sizes
 		"""
-		printf("Clearing too small...")
+		self.printf("Clearing too small...")
 		smalls = [size for size, files in self._files.items() if size < 10]
 		for size in smalls:
 			self._files.pop(size)
-		printf("OK: %d items\n" % len(smalls))
+		self.printf("OK: %d items\n" % len(smalls))
 
 	def is_dup(self, size, files):
 		"""
@@ -188,20 +184,20 @@ class DupFinder(object):
 		self._clear_singles()
 		self._clear_small()
 
-		#printf("Potential duplicates at this point: %s\n" % self._files)
+		#self.printf("Potential duplicates at this point: %s\n" % self._files)
 
 		ngroups = len(self._files.keys())
 		group = 1
 
 		dupes = []
 		for size, files in sorted(self._files.items()):
-			printf("\rChecking for dupes of size %d (%d/%d)..." % (size, group, ngroups))
+			self.printf("\rChecking for dupes of size %d (%d/%d)..." % (size, group, ngroups))
 			same = self.is_dup(size, files)
 			if same != []:
 				dupes.append((size, same))
-			printf("OK")
+			self.printf("OK")
 			group += 1
-		printf("\n")
+		self.printf("\n")
 
 		assert(self._file_handles._open_files == 0)
 		return dupes

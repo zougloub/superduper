@@ -1,8 +1,13 @@
 #!/usr/bin/env python
 # -*- coding: utf-8
 
-
+import sys, os, optparse, pickle, pprint
 from deduppy import DupFinder
+
+def printf(x):
+	if verbose > 0:
+		sys.stdout.write(x)
+		sys.stdout.flush()
 
 def main():
 
@@ -56,6 +61,7 @@ def main():
 		printf("OK\n")
 	else:
 		d = DupFinder()
+		d.printf = printf
 
 		printf("Looking for duplicates in %s\n" % args)
 
