@@ -1,0 +1,101 @@
+#!/usr/bin/env python
+# -*- coding: utf-8
+
+
+from deduppy import DupFinder
+
+def main():
+
+	global verbose
+
+	parser = optparse.OptionParser(
+	 usage="%prog [options] <dirs>\n%prog --help for details",
+	 version="%prog 1.0.0"
+	)
+
+	parser.add_option(
+	 "-q", "--quiet",
+	 action="store_false",
+	 dest="verbose",
+	 default=True,
+	 help="don't print status messages to stdout"
+	)
+
+	parser.add_option(
+	 "", "--hardlink",
+	 action="store_true",
+	 dest="hardlink",
+	 help="hard-link identical files",
+	)
+
+	parser.add_option(
+	 "", "--dump",
+	 dest="dump",
+	 help="dump list of dupes to file",
+	)
+
+	parser.add_option(
+	 "", "--load",
+	 dest="load",
+	 help="load list of dupes from file",
+	)
+
+	options, args = parser.parse_args()
+
+	if args == []:
+		parser.print_version()
+		parser.print_usage()
+		os._exit(1)
+
+	verbose = 1 if options.verbose else 0
+
+	if options.load:
+		printf("Loading dupe list from file...")
+		with open(options.load, "rb") as f:
+			alldupes = pickle.load(f)
+		printf("OK\n")
+	else:
+		d = DupFinder()
+
+		printf("Looking for duplicates in %s\n" % args)
+
+		d.add_dirs(args)
+		alldupes = d.find_dups()
+
+		if options.verbose:
+			printf("Total files: %d\n" % d._num_files)
+			printf("Bytes read: %d\n" % d._bytes_read)
+
+	if options.dump:
+		with open(options.dump, "wb") as f:
+			pickle.dump(alldupes, f)
+
+	#print("Alldupes=%s" % pprint.pformat(alldupes, depth=150, width=10000))
+	#return
+
+	if options.verbose:
+		print("Report:")
+
+	for size, dupes in sorted(alldupes):
+		if options.verbose:
+			sys.stdout.write("- size %s\n" % size)
+
+		for files in dupes:
+			if options.hardlink:
+				orig = files[0]
+				for f in files[1:]:
+					printf("Link %s <- %s ..." % (orig, f))
+					if not os.path.exists(f) or not os.path.exists(orig):
+						continue
+					os.rename(f, f + ".dupe")
+					os.link(orig, f)
+					os.unlink(f + ".dupe")
+					printf("OK\n")
+			else:
+				for f in files:
+					printf("\t%s" % f) #pprint.pprint(f, depth=150, width=1000))
+			printf("\n")
+
+if __name__ == "__main__":
+	main()
+
