@@ -70,6 +70,10 @@ def main():
 				s = deduppy.FileStore_FS(arg)
 				for f in s.walk():
 					d.add(f)
+			elif arg.endswith(".zip"):
+				s = deduppy.FileStore_ZipFile(arg)
+				for f in s.walk():
+					d.add(f)
 			else:
 				raise RuntimeError("%s is not supported" % arg)
 

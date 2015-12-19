@@ -6,5 +6,6 @@ __author__ = 'Jérôme Carretero <cJ-deduppy@zougloub.eu>'
 
 from .filestore import *
 from .filestore_fs import *
+from .filestore_zipfile import *
 from .dupfinder import *
 
