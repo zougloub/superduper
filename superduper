@@ -58,6 +58,13 @@ def main():
 	)
 
 	parser.add_argument(
+	 "--ignore-smaller-than",
+	 default=-1,
+	 type=int,
+	 help="ignore files smaller than a certain size",
+	)
+
+	parser.add_argument(
 	 "--shortcut-file-read-max",
 	 default=-1,
 	 type=int,
@@ -109,11 +116,17 @@ def main():
 			if os.path.isdir(arg):
 				s = deduppy.FileStore_FS(arg, ignore_exc=ign)
 				for f in s.walk():
+					if args.ignore_smaller_than > -1 \
+					 and f.stat.st_size < args.ignore_smaller_than:
+						continue
 					printf("- %s\n" % f)
 					d.add(f)
 			elif arg.endswith(".zip"):
 				s = deduppy.FileStore_ZipFile(arg)
 				for f in s.walk():
+					if args.ignore_smaller_than > -1 \
+					 and f.stat.st_size < args.ignore_smaller_than:
+						continue
 					printf("- %s\n" % f)
 					d.add(f)
 			else:
