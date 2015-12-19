@@ -42,13 +42,13 @@ def main():
 	)
 
 	parser.add_argument(
-	 "--dump",
-	 help="dump list of dupes to file",
+	 "--load-dupes",
+	 help="load list of dupes from file",
 	)
 
 	parser.add_argument(
-	 "--load",
-	 help="load list of dupes from file",
+	 "--dump-dupes",
+	 help="dump list of dupes to file",
 	)
 
 	parser.add_argument(
@@ -79,9 +79,9 @@ def main():
 
 	verbose = 1 if args.verbose else 0
 
-	if args.load:
+	if args.load_dupes:
 		printf("Loading dupe list from file...")
-		with open(args.load, "rb") as f:
+		with open(args.load_dupes, "rb") as f:
 			alldupes = pickle.load(f)
 		printf("OK\n")
 	else:
@@ -127,8 +127,8 @@ def main():
 		printf("Total files: %d\n" % d._num_files)
 		printf("Bytes read: %d\n" % d._bytes_read)
 
-	if args.dump:
-		with open(args.dump, "wb") as f:
+	if args.dump_dupes:
+		with open(args.dump_dupes, "wb") as f:
 			pickle.dump(alldupes, f)
 
 	#print("Alldupes=%s" % pprint.pformat(alldupes, depth=150, width=10000))
