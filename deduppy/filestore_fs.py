@@ -14,13 +14,14 @@ class FileStore_FS(filestore.FileStore):
 
 	It can hold a certain amount of open file descriptors
 	"""
-	def __init__(self, root, max_files=None):
+	def __init__(self, root, max_files=None, ignore_exc=None):
 		self.root = root
 		self._files = {} # name -> File
 		self._open_files = {} # relpath -> file object
 		if not max_files:
 			max_files = resource.getrlimit(resource.RLIMIT_OFILE)[0] - 3
 		self._max_open_files = max_files
+		self._ignore_exc = ignore_exc
 
 	def url(self):
 		return 'file://' + self.root + '/'
@@ -61,6 +62,7 @@ class FileStore_FS(filestore.FileStore):
 		del self._open_files[k]
 
 	def walk(self):
+
 		for cwd, dirs, files in os.walk(self.root):
 			dirs.sort()
 			files.sort()
@@ -68,7 +70,16 @@ class FileStore_FS(filestore.FileStore):
 				path = os.path.join(cwd, f)
 				relpath = os.path.relpath(path, self.root)
 
-				st = os.lstat(path)
+				try:
+					st = os.lstat(path)
+				except:
+					if self._ignore_exc is None:
+						raise
+					elif not self._ignore_exc():
+						raise
+					else:
+						continue
+
 				size = st.st_size
 				tup = st.st_dev, st.st_ino
 

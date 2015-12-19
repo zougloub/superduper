@@ -46,6 +46,12 @@ def main():
 	 help="load list of dupes from file",
 	)
 
+	parser.add_option(
+	 "", "--ignore-access-errors",
+	 action="store_true",
+	 help="ignore filesystem access errors that happen in stat() or open()",
+	)
+
 	options, args = parser.parse_args()
 
 	if args == []:
@@ -61,13 +67,29 @@ def main():
 			alldupes = pickle.load(f)
 		printf("OK\n")
 	else:
-		d = deduppy.DupFinder()
+
+		def ign():
+			"""
+			Ignore file access errors
+			"""
+			if not options.ignore_access_errors:
+				return False
+
+			if sys.exc_type == OSError and sys.exc_value.errno == 16:
+				# device or resource busy (gdrive)
+				return True
+			elif sys.exc_type == IOError and sys.exc_value.errno == 16:
+				# device or resource busy (gdrive)
+				return True
+
+
+		d = deduppy.DupFinder(ignore_exc=ign)
 		d.printf = printf
         
 		printf("Looking for duplicates in %s\n" % args)
 		for arg in args:
 			if os.path.isdir(arg):
-				s = deduppy.FileStore_FS(arg)
+				s = deduppy.FileStore_FS(arg, ignore_exc=ign)
 				for f in s.walk():
 					d.add(f)
 			elif arg.endswith(".zip"):

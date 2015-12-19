@@ -5,11 +5,12 @@
 BLOCKSIZE = 1024 * 8
 
 class DupFinder(object):
-	def __init__(self):
+	def __init__(self, ignore_exc=None, ignore_smaller_than=1):
 		self._files = {} # files, by size
 		self._bytes_read = 0
 		self._num_files = 0
-		self._cfg_ignore_smaller_than = 1
+		self._cfg_ignore_smaller_than = ignore_smaller_than
+		self._ignore_exc = ignore_exc
 
         def printf(self, x):
             pass
@@ -55,8 +56,18 @@ class DupFinder(object):
 				chunks = {}
 
 				sz = None
-				for f in group:
-					f.open()
+				for idx_f, f in enumerate(group):
+					try:
+						f.open()
+					except:
+						if self._ignore_exc is None:
+							raise
+						elif not self._ignore_exc():
+							raise
+						else:
+							del group[idx_f]
+							continue
+
 					chunk = f.read(pos, BLOCKSIZE)
 					sz = len(chunk)
 					self._bytes_read += sz
@@ -95,7 +106,7 @@ class DupFinder(object):
 		group = 1
 
 		dupes = []
-		for size, files in sorted(self._files.items()):
+		for size, files in sorted(self._files.items(), reverse=True):
 			self.printf("\rChecking for dupes of size %d (%d/%d)..." % (size, group, ngroups))
 			same = self.get_duplicate_groups(size, files)
 			if same != []:
