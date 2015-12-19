@@ -129,6 +129,14 @@ def main():
 						continue
 					printf("- %s\n" % f)
 					d.add(f)
+			elif arg.endswith(".rar") and getattr(deduppy, "FileStore_RarFile"):
+				s = deduppy.FileStore_RarFile(arg)
+				for f in s.walk():
+					if args.ignore_smaller_than > -1 \
+					 and f.stat.st_size < args.ignore_smaller_than:
+						continue
+					printf("- %s\n" % f)
+					d.add(f)
 			else:
 				raise RuntimeError("%s is not supported" % arg)
 			printf("Finished to look for files in %s\n" % arg)

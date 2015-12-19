@@ -9,3 +9,9 @@ from .filestore_fs import *
 from .filestore_zipfile import *
 from .dupfinder import *
 
+try:
+    from .filestore_rarfile import *
+except ImportError:
+    pass
+
+
