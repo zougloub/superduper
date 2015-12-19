@@ -12,8 +12,8 @@ class DupFinder(object):
 		self._cfg_ignore_smaller_than = ignore_smaller_than
 		self._ignore_exc = ignore_exc
 
-        def printf(self, x):
-            pass
+	def printf(self, x):
+		pass
 
 	def add(self, a_file):
 		size = a_file.stat.st_size
