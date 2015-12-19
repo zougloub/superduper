@@ -22,7 +22,7 @@ class DupFinder(object):
 
 	def _clear_singles(self):
 		"""
-			remove self._files entries which have only one file
+		remove entries which have only one file
 		"""
 		self.printf("Clearing singles...")
 		singles = [size for size, files in self._files.items() if len(files) == 1]
@@ -32,7 +32,7 @@ class DupFinder(object):
 
 	def _clear_small(self):
 		"""
-			remove self._files entries which have too small sizes
+		remove entries which have too small sizes
 		"""
 		self.printf("Clearing too small...")
 		smalls = filter(lambda size: size < self._cfg_ignore_smaller_than, self._files.keys())
@@ -42,7 +42,10 @@ class DupFinder(object):
 
 	def get_duplicate_groups(self, size, files):
 		"""
-			Returns the list of identical files in the files file list
+		Returns the list of identical files in the file list
+		:param size: group size
+		:param files: files that are candidate
+		:return: a list of lists of files that are identical between themselves
 		"""
 		groups = [files]
 
@@ -51,10 +54,11 @@ class DupFinder(object):
 		while not eof:
 			if groups == []:
 				break
-			n_groups = []
+
 			if self._file_read_max > -1 and pos >= self._file_read_max:
 				break
 
+			n_groups = [] # next groups
 
 			for group in groups:
 				chunks = {}
