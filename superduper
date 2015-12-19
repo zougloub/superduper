@@ -1,7 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 vi:ts=4:noet
+# SuperDuper!
+# PYTHON_ARGCOMPLETE_OK
 
-import sys, os, optparse, pickle, pprint
+import sys, os, argparse, pickle, pprint
 
 import deduppy
 
@@ -14,12 +16,18 @@ def main():
 
 	global verbose
 
-	parser = optparse.OptionParser(
+	parser = argparse.ArgumentParser(
 	 usage="%prog [options] <dirs>\n%prog --help for details",
-	 version="%prog 1.0.0"
+	 version="%prog v0.2"
 	)
 
-	parser.add_option(
+	parser.add_argument(
+	 "dirs",
+	 nargs="*",
+	 help="directories where to look for duplicates",
+	)
+
+	parser.add_argument(
 	 "-q", "--quiet",
 	 action="store_false",
 	 dest="verbose",
@@ -27,43 +35,47 @@ def main():
 	 help="don't print status messages to stdout"
 	)
 
-	parser.add_option(
-	 "", "--hardlink",
+	parser.add_argument(
+	 "--hardlink",
 	 action="store_true",
-	 dest="hardlink",
 	 help="hard-link identical files",
 	)
 
-	parser.add_option(
-	 "", "--dump",
-	 dest="dump",
+	parser.add_argument(
+	 "--dump",
 	 help="dump list of dupes to file",
 	)
 
-	parser.add_option(
-	 "", "--load",
-	 dest="load",
+	parser.add_argument(
+	 "--load",
 	 help="load list of dupes from file",
 	)
 
-	parser.add_option(
-	 "", "--ignore-access-errors",
+	parser.add_argument(
+	 "--ignore-access-errors",
 	 action="store_true",
 	 help="ignore filesystem access errors that happen in stat() or open()",
 	)
 
-	options, args = parser.parse_args()
 
-	if args == []:
+	try:
+		import argcomplete
+		argcomplete.autocomplete(parser)
+	except:
+		pass
+
+	args = parser.parse_args()
+
+	if args.dirs == []:
 		parser.print_version()
 		parser.print_usage()
 		os._exit(1)
 
-	verbose = 1 if options.verbose else 0
+	verbose = 1 if args.verbose else 0
 
-	if options.load:
+	if args.load:
 		printf("Loading dupe list from file...")
-		with open(options.load, "rb") as f:
+		with open(args.load, "rb") as f:
 			alldupes = pickle.load(f)
 		printf("OK\n")
 	else:
@@ -72,7 +84,7 @@ def main():
 			"""
 			Ignore file access errors
 			"""
-			if not options.ignore_access_errors:
+			if not args.ignore_access_errors:
 				return False
 
 			if sys.exc_type == OSError and sys.exc_value.errno == 16:
@@ -85,9 +97,9 @@ def main():
 
 		d = deduppy.DupFinder(ignore_exc=ign)
 		d.printf = printf
-        
-		printf("Looking for duplicates in %s\n" % args)
-		for arg in args:
+  
+		printf("Looking for duplicates in %s\n" % args.dirs)
+		for arg in args.dirs:
 			if os.path.isdir(arg):
 				s = deduppy.FileStore_FS(arg, ignore_exc=ign)
 				for f in s.walk():
@@ -101,26 +113,26 @@ def main():
 
 		alldupes = d.execute()
 
-		if options.verbose:
+		if args.verbose:
 			printf("Total files: %d\n" % d._num_files)
 			printf("Bytes read: %d\n" % d._bytes_read)
 
-	if options.dump:
-		with open(options.dump, "wb") as f:
+	if args.dump:
+		with open(args.dump, "wb") as f:
 			pickle.dump(alldupes, f)
 
 	#print("Alldupes=%s" % pprint.pformat(alldupes, depth=150, width=10000))
 	#return
 
-	if options.verbose:
+	if args.verbose:
 		print("Report:")
 
 	for size, dupes in sorted(alldupes):
-		if options.verbose:
+		if args.verbose:
 			sys.stdout.write("- size %s\n" % size)
 
 		for files in dupes:
-			if options.hardlink:
+			if args.hardlink:
 				orig = files[0]
 				for f in files[1:]:
 					printf("Link %s <- %s ..." % (orig, f))
