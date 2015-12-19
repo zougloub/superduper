@@ -5,12 +5,13 @@
 BLOCKSIZE = 1024 * 8
 
 class DupFinder(object):
-	def __init__(self, ignore_exc=None, ignore_smaller_than=1):
+	def __init__(self, ignore_exc=None, ignore_smaller_than=1, file_read_max=-1):
 		self._files = {} # files, by size
 		self._bytes_read = 0
 		self._num_files = 0
 		self._cfg_ignore_smaller_than = ignore_smaller_than
 		self._ignore_exc = ignore_exc
+		self._file_read_max = file_read_max
 
 	def printf(self, x):
 		pass
@@ -51,6 +52,9 @@ class DupFinder(object):
 			if groups == []:
 				break
 			n_groups = []
+			if self._file_read_max > -1 and pos >= self._file_read_max:
+				break
+
 
 			for group in groups:
 				chunks = {}
