@@ -39,10 +39,7 @@ The collection is filtered.
   - a size
   - a handle (used to read the data)
 
-- :class:`FileFinder` generates :class:`File` instances.
-
-- :class:`Dedupper` processes sets of files to identify duplicates
-
+- :class:`DupFinder` eats Files and identifies duplicates
 
 
 Installation
