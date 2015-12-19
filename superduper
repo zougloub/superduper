@@ -104,24 +104,28 @@ def main():
 		d = deduppy.DupFinder(ignore_exc=ign, file_read_max=args.shortcut_file_read_max)
 		d.printf = printf
   
-		printf("Looking for duplicates in %s\n" % args.dirs)
 		for arg in args.dirs:
+			printf("Starting to look for files in %s\n" % arg)
 			if os.path.isdir(arg):
 				s = deduppy.FileStore_FS(arg, ignore_exc=ign)
 				for f in s.walk():
+					printf("- %s\n" % f)
 					d.add(f)
 			elif arg.endswith(".zip"):
 				s = deduppy.FileStore_ZipFile(arg)
 				for f in s.walk():
+					printf("- %s\n" % f)
 					d.add(f)
 			else:
 				raise RuntimeError("%s is not supported" % arg)
+			printf("Finished to look for files in %s\n" % arg)
 
+		printf("Starting to identify duplicates\n")
 		alldupes = d.execute()
+		printf("Finished to identify duplicates\n")
 
-		if args.verbose:
-			printf("Total files: %d\n" % d._num_files)
-			printf("Bytes read: %d\n" % d._bytes_read)
+		printf("Total files: %d\n" % d._num_files)
+		printf("Bytes read: %d\n" % d._bytes_read)
 
 	if args.dump:
 		with open(args.dump, "wb") as f:
@@ -130,12 +134,10 @@ def main():
 	#print("Alldupes=%s" % pprint.pformat(alldupes, depth=150, width=10000))
 	#return
 
-	if args.verbose:
-		print("Report:")
+	printf("Report:\n")
 
 	for size, dupes in sorted(alldupes):
-		if args.verbose:
-			sys.stdout.write("- size %s\n" % size)
+		printf("- size %s\n" % size)
 
 		for files in dupes:
 			if args.hardlink:
