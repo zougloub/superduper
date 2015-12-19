@@ -57,6 +57,12 @@ def main():
 	 help="ignore filesystem access errors that happen in stat() or open()",
 	)
 
+	parser.add_argument(
+	 "--shortcut-file-read-max",
+	 default=-1,
+	 type=int,
+	 help="number of identical bytes to read on each file before concluding they are the same",
+	)
 
 	try:
 		import argcomplete
@@ -95,7 +101,7 @@ def main():
 				return True
 
 
-		d = deduppy.DupFinder(ignore_exc=ign)
+		d = deduppy.DupFinder(ignore_exc=ign, file_read_max=args.shortcut_file_read_max)
 		d.printf = printf
   
 		printf("Looking for duplicates in %s\n" % args.dirs)
