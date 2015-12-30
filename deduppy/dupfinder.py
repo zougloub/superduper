@@ -75,7 +75,10 @@ class DupFinder(object):
 							del group[idx_f]
 							continue
 
-					chunk = f.read(pos, self._blocksize)
+
+					toread = min(self._blocksize, f.stat.st_size - pos)
+
+					chunk = f.read(pos, toread)
 					sz = len(chunk)
 					self._bytes_read += sz
 					chunks.setdefault(chunk,[]).append(f)

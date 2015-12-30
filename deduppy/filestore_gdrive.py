@@ -55,13 +55,21 @@ class FileStore_GoogleDrive(filestore.FileStore):
 	def file_read(self, fn, pos, size):
 		drive_service = self._drive_service
 		assert fn in self._open_files
+		st = self._files[fn].stat
 		request = drive_service.files().get_media(
-		 fileId=self._files[fn].stat.st_id,
+		 fileId=st.st_id,
 		)
+
 		fh = io.BytesIO()
 		downloader = apiclient.http.MediaIoBaseDownload(fh, request)
 		downloader._progress = pos
-		downloader._chunksize = size
+		downloader._chunksize = min(size, st.st_size - pos)
+		if downloader._chunksize == 0:
+			return b""
+
+		#if downloader._chunksize != size:
+		#	print("PARTIAL fsize=%d pos=%d size=%d ch=%d" % (st.st_size, downloader._progress, size, downloader._chunksize))
+
 		status, done = downloader.next_chunk()
 		res = fh.getvalue()
 		return res
