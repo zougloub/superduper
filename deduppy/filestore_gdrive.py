@@ -2,7 +2,7 @@
 # -*- coding: utf-8 vi:noet
 # file store for Google Drive
 
-import io
+import io, time
 import httplib2
 import apiclient.discovery
 import apiclient.http
@@ -28,12 +28,22 @@ class FileStore_GoogleDrive(filestore.FileStore):
 		self._files = {} # name -> File
 		self._open_files = {} # relpath -> file object
 		self._drive_service = apiclient.discovery.build('drive', 'v3', http=http)
+		self._queries_times = []
+		self._qpdt = (10, 1.0)
 
 	def url(self):
 		if self.root == "/":
 			return 'gdrive://'
 		else:
 			return 'gdrive://' + self.root + '/'
+
+	def wait(self):
+		now = time.time()
+		if len(self._queries_times) >= self._qpdt[0]:
+			t0 = self._queries_times.pop(0)
+			if now - t0 < self._qpdt[1]:
+				time.sleep(self._qpdt[1] - (now-t0))
+		self._queries_times.append(time.time())
 
 	def file_open(self, fn):
 		drive_service = self._drive_service
@@ -42,6 +52,7 @@ class FileStore_GoogleDrive(filestore.FileStore):
 		 fileId=self._files[fn].stat.st_id,
 		 fields='mimeType',
 		)
+		self.wait()
 		response = request.execute()
 		if response.get('mimeType') in ('application/vnd.google-apps.document', 'application/vnd.google-apps.spreadsheet'):
 			return None
@@ -59,6 +70,7 @@ class FileStore_GoogleDrive(filestore.FileStore):
 		request = drive_service.files().get_media(
 		 fileId=st.st_id,
 		)
+		self.wait()
 
 		fh = io.BytesIO()
 		downloader = apiclient.http.MediaIoBaseDownload(fh, request)
@@ -82,11 +94,13 @@ class FileStore_GoogleDrive(filestore.FileStore):
 		parent_dict = {}
 		page_token = None
 		while True:
-			response = drive_service.files().list(
+			request = drive_service.files().list(
 			 q="mimeType='application/vnd.google-apps.folder'",
 			 spaces='drive',
 			 fields='nextPageToken, files(parents, id, name)',
-			 pageToken=page_token).execute()
+			 pageToken=page_token)
+			self.wait()
+			response = request.execute()
 			for f in response.get('files', []):
 				_id = f.get('id')
 				parent_dict[_id] = f.get('parents')
@@ -97,10 +111,12 @@ class FileStore_GoogleDrive(filestore.FileStore):
 
 		page_token = None
 		while True:
-			response = drive_service.files().list(
+			request = drive_service.files().list(
 			 spaces='drive',
 			 fields='nextPageToken, files(parents, mimeType, size, id, name)',
-			 pageToken=page_token).execute()
+			 pageToken=page_token)
+			self.wait()
+			response = request.execute()
 			for file in response.get('files', []):
 				_id = file.get('id')
 				if _id in parent_dict:
