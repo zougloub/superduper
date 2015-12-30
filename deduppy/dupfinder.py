@@ -2,16 +2,15 @@
 # -*- coding: utf-8 vi:noet
 # deduppy - duplicate finder
 
-BLOCKSIZE = 1024 * 8
-
 class DupFinder(object):
-	def __init__(self, ignore_exc=None, ignore_smaller_than=1, file_read_max=-1):
+	def __init__(self, ignore_exc=None, ignore_smaller_than=1, file_read_max=-1, blocksize=1024*8):
 		self._files = {} # files, by size
 		self._bytes_read = 0
 		self._num_files = 0
 		self._cfg_ignore_smaller_than = ignore_smaller_than
 		self._ignore_exc = ignore_exc
 		self._file_read_max = file_read_max
+		self._blocksize = blocksize
 
 	def printf(self, x):
 		pass
@@ -35,7 +34,7 @@ class DupFinder(object):
 		remove entries which have too small sizes
 		"""
 		self.printf("Clearing too small...")
-		smalls = filter(lambda size: size < self._cfg_ignore_smaller_than, self._files.keys())
+		smalls = [x for x in self._files.keys() if x < self._cfg_ignore_smaller_than]
 		for size in smalls:
 			self._files.pop(size)
 		self.printf("OK: %d items\n" % len(smalls))
@@ -76,7 +75,7 @@ class DupFinder(object):
 							del group[idx_f]
 							continue
 
-					chunk = f.read(pos, BLOCKSIZE)
+					chunk = f.read(pos, self._blocksize)
 					sz = len(chunk)
 					self._bytes_read += sz
 					chunks.setdefault(chunk,[]).append(f)
