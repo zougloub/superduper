@@ -14,4 +14,8 @@ try:
 except ImportError:
     pass
 
+try:
+	from .filestore_gdrive import *
+except ImportError:
+	pass
 
