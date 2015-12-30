@@ -64,9 +64,11 @@ class FileStore_GoogleDrive(filestore.FileStore):
 		del self._open_files[fn]
 
 	def file_read(self, fn, pos, size):
-		drive_service = self._drive_service
 		assert fn in self._open_files
+		if size == 0:
+			return b""
 		st = self._files[fn].stat
+		drive_service = self._drive_service
 		request = drive_service.files().get_media(
 		 fileId=st.st_id,
 		)
