@@ -46,7 +46,7 @@ class FileStore(object):
 	def file_close(self, relpath):
 		raise NotImplementedError()
 
-	def walk(self):
+	def walk(self, dir_recurse_func=None):
 		raise NotImplementedError()
 
 	def __str__(self):
