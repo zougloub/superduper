@@ -17,8 +17,7 @@ def main():
 	global verbose
 
 	parser = argparse.ArgumentParser(
-	 usage="%prog [options] <dirs>\n%prog --help for details",
-	 version="%prog v0.2"
+	 usage="prog [options] <dirs>\nprog --help for details",
 	)
 
 	parser.add_argument(
@@ -52,6 +51,16 @@ def main():
 	)
 
 	parser.add_argument(
+	 "--load-filelist",
+	 help="load list of files from file",
+	)
+
+	parser.add_argument(
+	 "--dump-filelist",
+	 help="dump list of files to file",
+	)
+
+	parser.add_argument(
 	 "--ignore-access-errors",
 	 action="store_true",
 	 help="ignore filesystem access errors that happen in stat() or open()",
@@ -80,7 +89,6 @@ def main():
 	args = parser.parse_args()
 
 	if args.dirs == []:
-		parser.print_version()
 		parser.print_usage()
 		os._exit(1)
 
