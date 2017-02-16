@@ -16,8 +16,9 @@ SuperDuper
 .. role:: msg(literal)
 .. role:: class(literal)
 
-SuperDuper is yet another duplicate finder tool,
-also providing a python library.
+SuperDuper is yet another duplicate finder tool, but also much more.
+It's designed to be a python library that can crawl through folder-like stuff,
+for any purposes.
 
 
 Design
@@ -48,4 +49,17 @@ Installation
 
 Usage
 #####
+
+Front-end tools are available:
+
+- :path:`filesearcher.py`
+
+TODO
+####
+
+- Count number of readdir()
+- Count number of stat()
+- Count number of bytes read
+- Limit number of bytes read per file
+- Count time
 
