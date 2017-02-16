@@ -61,9 +61,14 @@ class FileStore_FS(filestore.FileStore):
 		fh.close()
 		del self._open_files[k]
 
-	def walk(self):
+	def walk(self, dir_recurse_func=None):
+		if dir_recurse_func is None:
+			dir_recurse_func = lambda x: True
 
 		for cwd, dirs, files in os.walk(self.root):
+
+			dirs[:] = filter(lambda x: dir_recurse_func(os.path.join(cwd, x)), dirs)
+
 			dirs.sort()
 			files.sort()
 			for f in files:
