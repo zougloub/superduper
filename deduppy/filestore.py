@@ -56,3 +56,16 @@ class FileStore(object):
 
 	def url(self):
 		return 'unknown://'
+
+def create(arg):
+	import os
+	if os.path.isdir(arg):
+		from .filestore_fs import FileStore_FS
+		return FileStore_FS(arg)
+
+	if os.path.isfile(arg) and arg.endswith(".zip"):
+		from .filestore_zipfile import FileStore_ZipFile
+		return FileStore_ZipFile(arg)
+	
+	raise NotImplementedError()
+
