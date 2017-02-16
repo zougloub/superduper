@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 vi:noet
-# file store for zip archives, using python rarfile
+# file store for rar archives, using python rarfile
 
 import rarfile
 
